@@ -20,9 +20,9 @@ Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
 #define SERVOMIN  200
 #define SERVOMAX  580
 
-int fingerServos[] = {0, 1, 2, 3};
-int splayServos[] = {4, 5, 6};
-int thumbServos[] = {7, 8};
+int fingerServos[4] = {0, 1, 2, 3};
+int splayServos[3] = {4, 5, 6};
+int thumbServos[2] = {7, 8};
 
 int indexFinger = fingerServos[0];
 int middleFinger = fingerServos[1];
@@ -30,7 +30,7 @@ int ringFinger = fingerServos[2];
 int pinkieFinger = fingerServos[3]; 
 
 // Each finger has a different length
-float fingerProportionality[] = {1.0, 1.0, 1.0, 1.0};
+float fingerProportionality[4] = {1.0, 1.0, 1.0, 1.0};
 
 float angle = 0;
 
@@ -41,7 +41,7 @@ struct ServoConfig {
   int offset = 0;
 };
 
-ServoConfig servos = {
+ServoConfig servos[9] = {
   ServoConfig(.port=0), ServoConfig(.port=1), ServoConfig(.port=2), ServoConfig(.port=3),
   ServoConfig(.port=4), ServoConfig(.port=5), ServoConfig(.port=6),
   ServoConfig(.port=7), ServoConfig(.port=8)
@@ -85,8 +85,14 @@ void setSplay(int leftFinger, int rightFinger, float percent) {
   if (leftFinger == pinkieFinger || rightFinger == indexFinger || rightFinger - leftFinger != 1) {
     return;
   }
-  ServoConfig s = servos[leftFinger + 4];
 
+  if (leftFinger == indexFinger) {
+    moveServoPercent(splayServos[0], percent);
+  } else if (leftFinger == middleFinger) {
+    moveServoPercent(splayServos[1], percent);
+  } else if (leftFinger == ringFinger) {
+    moveServoPercent(splayServos[2], percent);
+  }
 }
 
 void setup() {
