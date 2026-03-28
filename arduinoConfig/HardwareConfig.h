@@ -29,7 +29,13 @@ struct ServoConfig {
 };
 
 ServoConfig servos[9] = {
-  ServoConfig{0, SERVOMIN, SERVOMAX, 0}, ServoConfig{1, SERVOMIN, SERVOMAX, 0}, ServoConfig{2, SERVOMIN, SERVOMAX, 0}, ServoConfig{3, SERVOMIN, SERVOMAX, 0},
-  ServoConfig{4, SERVOMIN, SERVOMAX, 0}, ServoConfig{5, SERVOMIN, SERVOMAX, 0}, ServoConfig{6, SERVOMIN, SERVOMAX, 0},
-  ServoConfig{7, SERVOMIN, SERVOMAX, 0}, ServoConfig{8, SERVOMIN, SERVOMAX, 0}
+  ServoConfig{0, SERVOMIN, SERVOMAX, 0},
+  ServoConfig{1, SERVOMIN, SERVOMAX, 0},
+  ServoConfig{2, SERVOMIN, SERVOMAX, 0},
+  ServoConfig{3, SERVOMIN, SERVOMAX, 0},
+  ServoConfig{4, SERVOMIN, SERVOMAX, 0},
+  ServoConfig{5, SERVOMIN, SERVOMAX, 0},
+  ServoConfig{6, SERVOMIN, SERVOMAX, 0},
+  ServoConfig{7, SERVOMIN, SERVOMAX, 0},
+  ServoConfig{8, SERVOMIN, SERVOMAX, 0}
 };
