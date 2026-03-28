@@ -23,13 +23,13 @@ float fingerProportionality[4] = {1.0, 1.0, 1.0, 1.0};
 
 struct ServoConfig {
   int port;
-  int minPulse = SERVOMIN;
-  int maxPulse = SERVOMAX;
-  int offset = 0;
+  int minPulse;
+  int maxPulse;
+  int offset;
 };
 
 ServoConfig servos[9] = {
-  ServoConfig{0}, ServoConfig{1}, ServoConfig{2}, ServoConfig{3},
-  ServoConfig{4}, ServoConfig{5}, ServoConfig{6},
-  ServoConfig{7}, ServoConfig{8}
+  ServoConfig{0, SERVOMIN, SERVOMAX, 0}, ServoConfig{1, SERVOMIN, SERVOMAX, 0}, ServoConfig{2, SERVOMIN, SERVOMAX, 0}, ServoConfig{3, SERVOMIN, SERVOMAX, 0},
+  ServoConfig{4, SERVOMIN, SERVOMAX, 0}, ServoConfig{5, SERVOMIN, SERVOMAX, 0}, ServoConfig{6, SERVOMIN, SERVOMAX, 0},
+  ServoConfig{7, SERVOMIN, SERVOMAX, 0}, ServoConfig{8, SERVOMIN, SERVOMAX, 0}
 };
