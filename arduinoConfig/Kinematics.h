@@ -1,9 +1,10 @@
 #pragma once
-#include "HardwareConfig.h"
+#include "Hardware.h"
 
 // Writes an angle to the servo, 0 <= degree <= 160
 void writeServo(int servoIndex, float degree) {
-  ServoConfig s = servos[servoIndex];
+  Servo s = servos[servoIndex];
+  degree = degree * s.multiplier + s.offset;
   if (degree < 0.0) {
     degree = 0.0;
   } else if (degree > 160.0) {
@@ -16,7 +17,8 @@ void writeServo(int servoIndex, float degree) {
 
 // Moves a servo based on percentage
 void moveServoPercent(int servoIndex, float percent) {
-  ServoConfig s = servos[servoIndex];
+  Servo s = servos[servoIndex];
+  percent = percent * s.multiplier + s.offset;
   if (percent < 0.0) {
     percent = 0.0;
   } else if (percent > 100.0) {
@@ -77,4 +79,9 @@ void setSplay(float percents[]) {
       moveServoPercent(splayServos[i], percents[i]);
     }
   }
+}
+
+void setThumb(float bendPercent, float crossPercent) {
+  moveServoPercent(thumbServos[0], bendPercent);
+  moveServoPercent(thumbServos[1], crossPercent);
 }

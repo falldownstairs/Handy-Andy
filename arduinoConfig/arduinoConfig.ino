@@ -12,7 +12,9 @@ Referenced from Adeept_RaspClaws-V2.0-20251030/Circuit-Schematic-Adeept_Robot-HA
 */ 
 
 #include <Arduino.h>
+#include "Hardware.h"
 #include "Kinematics.h"
+#include "Poses.h"
 
 float angle = 0;
 
