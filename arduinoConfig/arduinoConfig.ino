@@ -12,9 +12,27 @@ Referenced from Adeept_RaspClaws-V2.0-20251030/Circuit-Schematic-Adeept_Robot-HA
 */ 
 
 #include <Arduino.h>
-#include "Hardware.h"
-#include "Kinematics.h"
-#include "Poses.h"
+#include "Animator.h"
+
+String command = "";
+
+struct Command {
+  String trigger;
+  Pose pose;
+};
+
+Command commands[] = {
+  Command{"open", Gestures::openHand},
+  Command{"splay", Gestures::openHandSplayed},
+  Command{"fist", Gestures::closedFist},
+  Command{"point", Gestures::pointIndex},
+  Command{"thumbsup", Gestures::thumbsUp},
+  Command{"A", Letters::A},
+  Command{"B", Letters::B},
+  Command{"C", Letters::C}
+};
+
+const int NUM_COMMANDS = sizeof(commands) / sizeof(commands[0]);
 
 float angle = 0;
 
@@ -26,13 +44,30 @@ void setup() {
   pwm.setOscillatorFrequency(25000000);
   pwm.setPWMFreq(50);  // Analog servos run at ~50 Hz
   delay(10);
+
+  setTargetPose(Gestures::openHand);
 }
 
 void loop() {
+  updateAnimator();
+
   if (Serial.available() > 0) {
-    angle = Serial.parseFloat();
-    for (int i = 0; i < 2; i++) {
-      writeServo(i, angle);
+    command = Serial.readStringUntil('\n');
+    command.trim(); 
+
+    bool commandFound = false;
+
+    for (int i = 0; i < NUM_COMMANDS; i++) {
+      if (command.equalsIgnoreCase(commands[i].trigger)) {
+        setTargetPose(commands[i].pose);
+        Serial.println("Executing: " + commands[i].trigger);
+        commandFound = true;
+        break;
+      }
     }
-  } 
+
+    if (!commandFound) {
+      Serial.println("Unknown command: " + command);
+    }
+  }
 }
