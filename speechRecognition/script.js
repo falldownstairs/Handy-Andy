@@ -38,12 +38,13 @@ recognition.onend = () => {
 };
 
 
-document.getElementById('start').onclick = () => {
-    isListening = true;
-    recognition.start();
-};
-
-document.getElementById('stop').onclick = () => {
-    isListening = false;
-    recognition.stop();
+document.getElementById('toggle').onclick = () => {
+    isListening = !isListening;
+    if (isListening) {
+        recognition.start();
+        document.getElementById('toggle').innerText = "Stop Listening";
+    } else {
+        recognition.stop();
+        document.getElementById('toggle').innerText = "Start Listening";
+    }
 };

@@ -1,0 +1,17 @@
+/* Brown Color Palette */
+/* Extracted from palette image — lightest to darkest */
+
+:root {
+  --color-1: #F5EDE0; /* lightest cream */
+  --color-2: #EDD9C5; /* light blush beige */
+  --color-3: #DFC9B0; /* warm sand */
+  --color-4: #D4B89A; /* muted tan */
+  --color-5: #CCB08A; /* soft caramel */
+  --color-6: #BFA07A; /* medium tan */
+  --color-7: #B8956E; /* golden tan */
+  --color-8: #C08040; /* warm amber brown */
+  --color-9: #A07050; /* medium brown */
+  --color-10: #8B5E3C; /* dark saddle brown */
+  --color-11: #7A5230; /* deep brown */
+  --color-12: #6B4A2A; /* darkest brown */
+}
