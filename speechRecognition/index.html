@@ -637,7 +637,7 @@
       const transcript = event.results[event.results.length - 1][0].transcript.toLowerCase().trim();
       logMessage(`Heard: "${transcript}"`, 'data');
 
-      if (writer && (transcript === "on" || transcript === "off")) {
+      if (writer && (transcript !== "on" && transcript !== "off")) {
         const encoder = new TextEncoder();
         await writer.write(encoder.encode(transcript + "\n"));
         logMessage(`Sent command: "${transcript}"`, 'sys');

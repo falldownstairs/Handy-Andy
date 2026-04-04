@@ -23,10 +23,10 @@ struct Command {
 
 Command commands[] = {
   Command{"open", Gestures::openHand},
-  Command{"splay", Gestures::openHandSplayed},
+  Command{"spread", Gestures::openHandSplayed},
   Command{"fist", Gestures::closedFist},
   Command{"point", Gestures::pointIndex},
-  Command{"thumbsup", Gestures::thumbsUp},
+  Command{"thumbs up", Gestures::thumbsUp},
   Command{"A", Letters::A},
   Command{"B", Letters::B},
   Command{"C", Letters::C}
