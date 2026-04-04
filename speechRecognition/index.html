@@ -556,56 +556,91 @@
     });
 
     // ── UI Integration Logic ─────────────────────────────────
-    let port, writer;
+    let port, writer, reader;
     let isListening = false;
     let currentMode = 'voice';
     let isSigning = false;
+    let resolveCurrentSign = null;
 
     const COMMANDS = ['open', 'spread', 'fist', 'point', 'thumbs up'];
+    const encoder = new TextEncoder();
 
     function setInputLocked(locked) {
       textInput.disabled = locked;
       toggleListenBtn.disabled = locked;
     }
 
-    async function signText(text, wordByWord) {
+    async function startReader() {
+      const decoder = new TextDecoder();
+      let buffer = '';
+      try {
+        while (true) {
+          const { value, done } = await reader.read();
+          if (done) break;
+          buffer += decoder.decode(value);
+          const lines = buffer.split('\n');
+          buffer = lines.pop();
+          for (const line of lines) {
+            const trimmed = line.trim();
+            logMessage(`Arduino: ${trimmed}`, 'data');
+            if (trimmed === 'DONE' && resolveCurrentSign) {
+              resolveCurrentSign();
+              resolveCurrentSign = null;
+            }
+          }
+        }
+      } catch (e) {
+        logMessage('Reader error: ' + e.message, 'err');
+      }
+    }
+
+    async function sendAndWait(command) {
+      return new Promise((resolve) => {
+        resolveCurrentSign = resolve;
+        writer.write(encoder.encode(command + "\n"));
+      });
+    }
+
+    function parseTokens(text) {
+      const tokens = [];
+      const words = text.split(/\s+/).filter(Boolean);
+      let i = 0;
+      while (i < words.length) {
+        let matched = false;
+        for (let len = words.length - i; len > 1; len--) {
+          const phrase = words.slice(i, i + len).join(' ');
+          if (COMMANDS.includes(phrase)) {
+            tokens.push(phrase);
+            i += len;
+            matched = true;
+            break;
+          }
+        }
+        if (!matched) {
+          if (COMMANDS.includes(words[i])) {
+            tokens.push(words[i]);
+          } else {
+            for (const ch of words[i].toUpperCase()) {
+              if (/[A-Z]/.test(ch)) tokens.push(ch);
+            }
+          }
+          i++;
+        }
+      }
+      return tokens;
+    }
+
+    async function signText(text) {
       if (!writer) {
         logMessage("Not connected to Arduino", 'err');
         return;
       }
       isSigning = true;
       setInputLocked(true);
-      const encoder = new TextEncoder();
-      if (!wordByWord) {
-        // Voice: check full phrase first, else sign every letter
-        if (COMMANDS.includes(text)) {
-          await writer.write(encoder.encode(text + "\n"));
-          logMessage(`Signing command: "${text}"`, 'sys');
-        } else {
-          for (const letter of text.toUpperCase()) {
-            if (/[A-Z]/.test(letter)) {
-              await writer.write(encoder.encode(letter + "\n"));
-              logMessage(`Signing letter: "${letter}"`, 'sys');
-            }
-          }
-        }
-      } else {
-        // Text: word by word
-        const words = text.split(/\s+/);
-        for (const word of words) {
-          if (!word) continue;
-          if (COMMANDS.includes(word)) {
-            await writer.write(encoder.encode(word + "\n"));
-            logMessage(`Signing command: "${word}"`, 'sys');
-          } else {
-            for (const letter of word.toUpperCase()) {
-              if (/[A-Z]/.test(letter)) {
-                await writer.write(encoder.encode(letter + "\n"));
-                logMessage(`Signing letter: "${letter}"`, 'sys');
-              }
-            }
-          }
-        }
+      const tokens = parseTokens(text);
+      for (const token of tokens) {
+        logMessage(COMMANDS.includes(token) ? `Signing command: "${token}"` : `Signing letter: "${token}"`, 'sys');
+        await sendAndWait(token);
       }
       isSigning = false;
       setInputLocked(false);
@@ -628,6 +663,8 @@
         port = await navigator.serial.requestPort();
         await port.open({ baudRate: 9600 });
         writer = port.writable.getWriter();
+        reader = port.readable.getReader();
+        startReader();
         logMessage("Arduino Connected Successfully", 'sys');
         document.getElementById('connect-btn').innerText = "Connected";
         document.getElementById('connect-btn').classList.add('active');
@@ -668,7 +705,7 @@
         if (val) {
           logMessage(`Text typed: "${val}"`, 'data');
           textInput.value = '';
-          await signText(val, true);
+          await signText(val);
         }
       }
     });
@@ -683,7 +720,7 @@
       logMessage(`Heard: "${transcript}"`, 'data');
       isListening = false;
       updateVoiceToggle();
-      await signText(transcript, false);
+      await signText(transcript);
     };
 
     recognition.onend = () => {

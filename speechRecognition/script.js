@@ -1,8 +1,10 @@
-let port, writer;
+let port, writer, reader;
 let isListening = false;
 let isSigning = false;
+let resolveCurrentSign = null;
 
 const COMMANDS = ['open', 'spread', 'fist', 'point', 'thumbs up'];
+const encoder = new TextEncoder();
 
 
 document.getElementById('connect').onclick = async () => {
@@ -10,11 +12,76 @@ document.getElementById('connect').onclick = async () => {
         port = await navigator.serial.requestPort();
         await port.open({ baudRate: 9600 });
         writer = port.writable.getWriter();
+        reader = port.readable.getReader();
+        startReader();
         document.getElementById('status').innerText = "Status: Connected!";
     } catch (err) {
         alert("err");
     }
 };
+
+
+async function startReader() {
+    const decoder = new TextDecoder();
+    let buffer = '';
+    try {
+        while (true) {
+            const { value, done } = await reader.read();
+            if (done) break;
+            buffer += decoder.decode(value);
+            const lines = buffer.split('\n');
+            buffer = lines.pop();
+            for (const line of lines) {
+                const trimmed = line.trim();
+                console.log('Arduino:', trimmed);
+                if (trimmed === 'DONE' && resolveCurrentSign) {
+                    resolveCurrentSign();
+                    resolveCurrentSign = null;
+                }
+            }
+        }
+    } catch (e) {
+        console.error('Reader error:', e);
+    }
+}
+
+
+async function sendAndWait(command) {
+    return new Promise((resolve) => {
+        resolveCurrentSign = resolve;
+        writer.write(encoder.encode(command + "\n"));
+    });
+}
+
+
+function parseTokens(text) {
+    const tokens = [];
+    const words = text.split(/\s+/).filter(Boolean);
+    let i = 0;
+    while (i < words.length) {
+        let matched = false;
+        for (let len = words.length - i; len > 1; len--) {
+            const phrase = words.slice(i, i + len).join(' ');
+            if (COMMANDS.includes(phrase)) {
+                tokens.push(phrase);
+                i += len;
+                matched = true;
+                break;
+            }
+        }
+        if (!matched) {
+            if (COMMANDS.includes(words[i])) {
+                tokens.push(words[i]);
+            } else {
+                for (const ch of words[i].toUpperCase()) {
+                    if (/[A-Z]/.test(ch)) tokens.push(ch);
+                }
+            }
+            i++;
+        }
+    }
+    return tokens;
+}
 
 
 const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
@@ -32,17 +99,10 @@ recognition.onresult = async (event) => {
     if (writer) {
         isSigning = true;
         document.getElementById('toggle').disabled = true;
-        const encoder = new TextEncoder();
-        if (COMMANDS.includes(transcript)) {
-            await writer.write(encoder.encode(transcript + "\n"));
-            console.log(`Signing command: "${transcript}"`);
-        } else {
-            for (const letter of transcript.toUpperCase()) {
-                if (/[A-Z]/.test(letter)) {
-                    await writer.write(encoder.encode(letter + "\n"));
-                    console.log(`Signing letter: "${letter}"`);
-                }
-            }
+        const tokens = parseTokens(transcript);
+        for (const token of tokens) {
+            console.log(COMMANDS.includes(token) ? `Signing command: "${token}"` : `Signing letter: "${token}"`);
+            await sendAndWait(token);
         }
         isSigning = false;
         document.getElementById('toggle').disabled = false;

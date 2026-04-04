@@ -61,6 +61,10 @@ Command Alphabet[] = {
 const int NUM_COMMANDS = sizeof(commands) / sizeof(commands[0]);
 const int NUM_ALPHABET = sizeof(Alphabet) / sizeof(Alphabet[0]);
 
+const unsigned long SIGN_HOLD_MS = 500;
+bool waitingForDone = false;
+unsigned long signCompleteTime = 0;
+
 float angle = 0;
 
 void setup() {
@@ -77,6 +81,14 @@ void setup() {
 
 void loop() {
   updateAnimator();
+
+  if (waitingForDone) {
+    if (millis() >= signCompleteTime) {
+      Serial.println("DONE");
+      waitingForDone = false;
+    }
+    return;
+  }
 
   if (Serial.available() > 0) {
     command = Serial.readStringUntil('\n');
@@ -104,7 +116,10 @@ void loop() {
       }
     }
 
-    if (!commandFound) {
+    if (commandFound) {
+      signCompleteTime = millis() + (unsigned long)poseDuration + SIGN_HOLD_MS;
+      waitingForDone = true;
+    } else {
       Serial.println("Unknown command: " + command);
     }
   }
