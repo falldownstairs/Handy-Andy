@@ -61,7 +61,6 @@ Command Alphabet[] = {
 const int NUM_COMMANDS = sizeof(commands) / sizeof(commands[0]);
 const int NUM_ALPHABET = sizeof(Alphabet) / sizeof(Alphabet[0]);
 
-const unsigned long SIGN_HOLD_MS = 500;
 bool waitingForDone = false;
 unsigned long signCompleteTime = 0;
 
@@ -117,7 +116,7 @@ void loop() {
     }
 
     if (commandFound) {
-      signCompleteTime = millis() + (unsigned long)poseDuration + SIGN_HOLD_MS;
+      signCompleteTime = millis() + (unsigned long)poseDuration + 500;
       waitingForDone = true;
     } else {
       Serial.println("Unknown command: " + command);
