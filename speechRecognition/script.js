@@ -1,5 +1,8 @@
 let port, writer;
 let isListening = false;
+let isSigning = false;
+
+const COMMANDS = ['open', 'spread', 'fist', 'point', 'thumbs up'];
 
 
 document.getElementById('connect').onclick = async () => {
@@ -23,22 +26,38 @@ recognition.onresult = async (event) => {
     const transcript = event.results[event.results.length - 1][0].transcript.toLowerCase().trim();
     document.getElementById('status').innerText = "Last heard: " + transcript;
 
-    if (writer && (transcript === "on" || transcript === "off")) {
+    isListening = false;
+    document.getElementById('toggle').innerText = "Start Listening";
+
+    if (writer) {
+        isSigning = true;
+        document.getElementById('toggle').disabled = true;
         const encoder = new TextEncoder();
-        await writer.write(encoder.encode(transcript + "\n"));
-        console.log("Sent command:", transcript);
+        if (COMMANDS.includes(transcript)) {
+            await writer.write(encoder.encode(transcript + "\n"));
+            console.log(`Signing command: "${transcript}"`);
+        } else {
+            for (const letter of transcript.toUpperCase()) {
+                if (/[A-Z]/.test(letter)) {
+                    await writer.write(encoder.encode(letter + "\n"));
+                    console.log(`Signing letter: "${letter}"`);
+                }
+            }
+        }
+        isSigning = false;
+        document.getElementById('toggle').disabled = false;
     }
 };
 
 
 recognition.onend = () => {
-    if (isListening) {
-        recognition.start();
-    }
+    isListening = false;
+    document.getElementById('toggle').innerText = "Start Listening";
 };
 
 
 document.getElementById('toggle').onclick = () => {
+    if (isSigning) return;
     isListening = !isListening;
     if (isListening) {
         recognition.start();

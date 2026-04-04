@@ -27,12 +27,39 @@ Command commands[] = {
   Command{"fist", Gestures::closedFist},
   Command{"point", Gestures::pointIndex},
   Command{"thumbs up", Gestures::thumbsUp},
+};
+
+Command Alphabet[] = {
   Command{"A", Letters::A},
   Command{"B", Letters::B},
-  Command{"C", Letters::C}
+  Command{"C", Letters::C},
+  Command{"D", Letters::D},
+  Command{"E", Letters::E},
+  Command{"F", Letters::F},
+  Command{"G", Letters::G},
+  Command{"H", Letters::H},
+  Command{"I", Letters::I},
+  Command{"J", Letters::J},
+  Command{"K", Letters::K},
+  Command{"L", Letters::L},
+  Command{"M", Letters::M},
+  Command{"N", Letters::N},
+  Command{"O", Letters::O},
+  Command{"P", Letters::P},
+  Command{"Q", Letters::Q},
+  Command{"R", Letters::R},
+  Command{"S", Letters::S},
+  Command{"T", Letters::T},
+  Command{"U", Letters::U},
+  Command{"V", Letters::V},
+  Command{"W", Letters::W},
+  Command{"X", Letters::X},
+  Command{"Y", Letters::Y},
+  Command{"Z", Letters::Z}
 };
 
 const int NUM_COMMANDS = sizeof(commands) / sizeof(commands[0]);
+const int NUM_ALPHABET = sizeof(Alphabet) / sizeof(Alphabet[0]);
 
 float angle = 0;
 
@@ -60,9 +87,20 @@ void loop() {
     for (int i = 0; i < NUM_COMMANDS; i++) {
       if (command.equalsIgnoreCase(commands[i].trigger)) {
         setTargetPose(commands[i].pose);
-        Serial.println("Executing: " + commands[i].trigger);
+        Serial.println("Signing: " + commands[i].trigger);
         commandFound = true;
         break;
+      }
+    }
+
+    if (!commandFound) {
+      for (int i = 0; i < NUM_ALPHABET; i++) {
+        if (command.equalsIgnoreCase(Alphabet[i].trigger)) {
+          setTargetPose(Alphabet[i].pose);
+          Serial.println("Signing: " + Alphabet[i].trigger);
+          commandFound = true;
+          break;
+        }
       }
     }
 

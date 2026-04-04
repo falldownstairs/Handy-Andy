@@ -559,6 +559,57 @@
     let port, writer;
     let isListening = false;
     let currentMode = 'voice';
+    let isSigning = false;
+
+    const COMMANDS = ['open', 'spread', 'fist', 'point', 'thumbs up'];
+
+    function setInputLocked(locked) {
+      textInput.disabled = locked;
+      toggleListenBtn.disabled = locked;
+    }
+
+    async function signText(text, wordByWord) {
+      if (!writer) {
+        logMessage("Not connected to Arduino", 'err');
+        return;
+      }
+      isSigning = true;
+      setInputLocked(true);
+      const encoder = new TextEncoder();
+      if (!wordByWord) {
+        // Voice: check full phrase first, else sign every letter
+        if (COMMANDS.includes(text)) {
+          await writer.write(encoder.encode(text + "\n"));
+          logMessage(`Signing command: "${text}"`, 'sys');
+        } else {
+          for (const letter of text.toUpperCase()) {
+            if (/[A-Z]/.test(letter)) {
+              await writer.write(encoder.encode(letter + "\n"));
+              logMessage(`Signing letter: "${letter}"`, 'sys');
+            }
+          }
+        }
+      } else {
+        // Text: word by word
+        const words = text.split(/\s+/);
+        for (const word of words) {
+          if (!word) continue;
+          if (COMMANDS.includes(word)) {
+            await writer.write(encoder.encode(word + "\n"));
+            logMessage(`Signing command: "${word}"`, 'sys');
+          } else {
+            for (const letter of word.toUpperCase()) {
+              if (/[A-Z]/.test(letter)) {
+                await writer.write(encoder.encode(letter + "\n"));
+                logMessage(`Signing letter: "${letter}"`, 'sys');
+              }
+            }
+          }
+        }
+      }
+      isSigning = false;
+      setInputLocked(false);
+    }
 
     const logsEl = document.getElementById('logs');
     function logMessage(msg, type = 'sys') {
@@ -612,18 +663,12 @@
     // Text Output
     const textInput = document.getElementById('text-input');
     textInput.addEventListener('keypress', async (e) => {
-      if (e.key === 'Enter') {
+      if (e.key === 'Enter' && !isSigning) {
         const val = textInput.value.trim().toLowerCase();
         if (val) {
           logMessage(`Text typed: "${val}"`, 'data');
-          if (writer) {
-            const encoder = new TextEncoder();
-            await writer.write(encoder.encode(val + "\n"));
-            logMessage(`Sent command: "${val}"`, 'sys');
-          } else {
-            logMessage("Not connected to Arduino", 'err');
-          }
           textInput.value = '';
+          await signText(val, true);
         }
       }
     });
@@ -636,23 +681,14 @@
     recognition.onresult = async (event) => {
       const transcript = event.results[event.results.length - 1][0].transcript.toLowerCase().trim();
       logMessage(`Heard: "${transcript}"`, 'data');
-
-      if (writer && (transcript !== "on" && transcript !== "off")) {
-        const encoder = new TextEncoder();
-        await writer.write(encoder.encode(transcript + "\n"));
-        logMessage(`Sent command: "${transcript}"`, 'sys');
-      } else if (writer) {
-        logMessage(`Command "${transcript}" not recognized for Arduino`, 'err');
-      }
+      isListening = false;
+      updateVoiceToggle();
+      await signText(transcript, false);
     };
 
     recognition.onend = () => {
-      if (isListening && currentMode === 'voice') {
-        recognition.start();
-      } else {
-        isListening = false;
-        updateVoiceToggle();
-      }
+      isListening = false;
+      updateVoiceToggle();
     };
 
     const toggleListenBtn = document.getElementById('toggle-listen');
@@ -667,6 +703,7 @@
     }
 
     toggleListenBtn.onclick = () => {
+      if (isSigning) return;
       isListening = !isListening;
       if (isListening) {
         try {
