@@ -53,7 +53,7 @@ void loop() {
 
   if (Serial.available() > 0) {
     command = Serial.readStringUntil('\n');
-    command.trim(); 
+    command.trim();
 
     bool commandFound = false;
 
