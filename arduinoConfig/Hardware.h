@@ -6,8 +6,8 @@
 Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
 
 // Standard servo pulse widths
-#define SERVOMIN  200
-#define SERVOMAX  580
+#define SERVOMIN  130 // 200
+#define SERVOMAX  490 // 580
 
 int fingerServos[4] = {0, 1, 2, 3};
 int splayServos[3] = {4, 5, 6};

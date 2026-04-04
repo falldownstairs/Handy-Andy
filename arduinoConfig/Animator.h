@@ -11,7 +11,7 @@ unsigned long lastUpdateTime = 0;
 int updateInterval = 15;
 
 unsigned long poseStartTime = 0;
-float poseDuration = 600.0; // How long a full pose change takes in milliseconds
+float poseDuration = 670.0; // How long a full pose change takes in milliseconds
 
 // Timing and speed control for the non-easing version
 float stepSize = 2.0;     // Percentage to move per tick
