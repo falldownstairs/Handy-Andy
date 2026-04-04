@@ -582,7 +582,6 @@
           buffer = lines.pop();
           for (const line of lines) {
             const trimmed = line.trim();
-            logMessage(`Arduino: ${trimmed}`, 'data');
             if (trimmed === 'DONE' && resolveCurrentSign) {
               resolveCurrentSign();
               resolveCurrentSign = null;
@@ -639,7 +638,7 @@
       setInputLocked(true);
       const tokens = parseTokens(text);
       for (const token of tokens) {
-        logMessage(COMMANDS.includes(token) ? `Signing command: "${token}"` : `Signing letter: "${token}"`, 'sys');
+        logMessage(`Signing: "${token}"`, 'sys');
         await sendAndWait(token);
       }
       isSigning = false;

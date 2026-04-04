@@ -33,7 +33,6 @@ async function startReader() {
             buffer = lines.pop();
             for (const line of lines) {
                 const trimmed = line.trim();
-                console.log('Arduino:', trimmed);
                 if (trimmed === 'DONE' && resolveCurrentSign) {
                     resolveCurrentSign();
                     resolveCurrentSign = null;
@@ -101,7 +100,7 @@ recognition.onresult = async (event) => {
         document.getElementById('toggle').disabled = true;
         const tokens = parseTokens(transcript);
         for (const token of tokens) {
-            console.log(COMMANDS.includes(token) ? `Signing command: "${token}"` : `Signing letter: "${token}"`);
+            console.log(`Signing: "${token}"`);
             await sendAndWait(token);
         }
         isSigning = false;
