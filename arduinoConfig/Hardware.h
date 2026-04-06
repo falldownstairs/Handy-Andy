@@ -6,7 +6,7 @@
 Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
 
 // Standard servo pulse widths
-#define SERVOMIN  130 // 200
+#define SERVOMIN  140 // 200
 #define SERVOMAX  490 // 580
 
 const int SERVO_COUNT = 9;
@@ -38,11 +38,11 @@ Servo servos[SERVO_COUNT] = {
   // pinkie finger
   Servo{3, SERVOMIN, SERVOMAX, 0, 1.0},
   // index-middle splay
-  Servo{4, SERVOMIN, SERVOMAX, 0, 1.0},
+  Servo{4, SERVOMIN, SERVOMAX, 0, 0.086},
   // middle-ring splay
-  Servo{5, SERVOMIN, SERVOMAX, 0, 1.0},
+  Servo{5, SERVOMAX, SERVOMIN, 0, 0.101},
   // ring-pinkie splay
-  Servo{6, SERVOMIN, SERVOMAX, 0, 1.0},
+  Servo{6, SERVOMAX, SERVOMIN, 0, 0.114},
   // bend thumb
   Servo{7, SERVOMIN, SERVOMAX, 0, 1.0},
   // cross thumb
