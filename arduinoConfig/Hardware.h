@@ -9,6 +9,8 @@ Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
 #define SERVOMIN  130 // 200
 #define SERVOMAX  490 // 580
 
+const int SERVO_COUNT = 9;
+
 int fingerServos[4] = {0, 1, 2, 3};
 int splayServos[3] = {4, 5, 6};
 int thumbServos[2] = {7, 8};
@@ -26,7 +28,7 @@ struct Servo {
   float multiplier;
 };
 
-Servo servos[9] = {
+Servo servos[SERVO_COUNT] = {
   // index finger
   Servo{0, SERVOMIN, SERVOMAX, 0, 1.0},
   // middle finger

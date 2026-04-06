@@ -36,8 +36,8 @@ void setFinger(int fingerIndex, float percent) {
 
 // Moves all fingers to the same percentage
 void setFingers(float percent) {
-  for (int s: fingerServos) {
-    setFinger(s, percent);
+  for (int i = 0; i < 4; i++) {
+    setFinger(i, percent);
   }
 }
 

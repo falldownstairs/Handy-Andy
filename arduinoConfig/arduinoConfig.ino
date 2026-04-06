@@ -66,6 +66,121 @@ unsigned long signCompleteTime = 0;
 
 float angle = 0;
 
+const float RAW_MOVE_DURATION_MS = 140.0;
+const unsigned long STATE_UPDATE_INTERVAL_MS = 120;
+
+int lastReportedPercents[SERVO_COUNT] = {-1, -1, -1, -1, -1, -1, -1, -1, -1};
+unsigned long lastStateUpdateTime = 0;
+
+float clampPercent(float value) {
+  if (value < 0.0) {
+    return 0.0;
+  }
+  if (value > 100.0) {
+    return 100.0;
+  }
+  return value;
+}
+
+bool parseRawServoCommand(const String& rawCommand, float outValues[SERVO_COUNT]) {
+  if (!rawCommand.startsWith("raw,")) {
+    return false;
+  }
+
+  int start = 4;
+  for (int i = 0; i < SERVO_COUNT; i++) {
+    int commaIndex = rawCommand.indexOf(',', start);
+    String token = (commaIndex == -1) ? rawCommand.substring(start) : rawCommand.substring(start, commaIndex);
+    token.trim();
+
+    if (token.length() == 0) {
+      return false;
+    }
+
+    bool isValidNumber = true;
+    bool hasDigit = false;
+    bool hasDot = false;
+    for (unsigned int c = 0; c < token.length(); c++) {
+      char ch = token.charAt(c);
+      if (ch >= '0' && ch <= '9') {
+        hasDigit = true;
+        continue;
+      }
+      if (ch == '.' && !hasDot) {
+        hasDot = true;
+        continue;
+      }
+      if ((ch == '-' || ch == '+') && c == 0) {
+        continue;
+      }
+      isValidNumber = false;
+      break;
+    }
+
+    if (!isValidNumber || !hasDigit) {
+      return false;
+    }
+
+    outValues[i] = clampPercent(token.toFloat());
+
+    if (i < SERVO_COUNT - 1) {
+      if (commaIndex == -1) {
+        return false;
+      }
+      start = commaIndex + 1;
+    } else if (commaIndex != -1) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+int roundedServoPercent(float value) {
+  int v = (int)round(clampPercent(value));
+  if (v < 0) {
+    return 0;
+  }
+  if (v > 100) {
+    return 100;
+  }
+  return v;
+}
+
+void applyRawServoValues(const float values[SERVO_COUNT]) {
+  setTargetPercents(values, RAW_MOVE_DURATION_MS);
+}
+
+void sendStateUpdate(bool force) {
+  unsigned long now = millis();
+  if (!force && (now - lastStateUpdateTime) < STATE_UPDATE_INTERVAL_MS) {
+    return;
+  }
+
+  bool changed = force;
+  int roundedValues[SERVO_COUNT];
+  for (int i = 0; i < SERVO_COUNT; i++) {
+    roundedValues[i] = roundedServoPercent(currentPercents[i]);
+    if (!changed && roundedValues[i] != lastReportedPercents[i]) {
+      changed = true;
+    }
+  }
+
+  if (!changed) {
+    return;
+  }
+
+  String stateMessage = "STATE";
+  for (int i = 0; i < SERVO_COUNT; i++) {
+    stateMessage += ",";
+    stateMessage += roundedValues[i];
+    lastReportedPercents[i] = roundedValues[i];
+  }
+
+  Serial.println(stateMessage);
+  lastStateUpdateTime = now;
+}
+
 void setup() {
   Serial.begin(9600);
   Serial.println("Running...");
@@ -76,10 +191,12 @@ void setup() {
   delay(10);
 
   setTargetPose(Gestures::openHand);
+  sendStateUpdate(true);
 }
 
 void loop() {
   updateAnimator();
+  sendStateUpdate(false);
 
   if (waitingForDone) {
     if (millis() >= signCompleteTime) {
@@ -92,6 +209,18 @@ void loop() {
   if (Serial.available() > 0) {
     command = Serial.readStringUntil('\n');
     command.trim();
+
+    if (command.startsWith("raw,")) {
+      float values[SERVO_COUNT];
+      if (parseRawServoCommand(command, values)) {
+        applyRawServoValues(values);
+        Serial.println("RAW OK");
+        sendStateUpdate(true);
+      } else {
+        Serial.println("RAW ERR");
+      }
+      return;
+    }
 
     bool commandFound = false;
 
