@@ -3,6 +3,9 @@
 
 <head>
   <meta charset="UTF-8" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
   <title>Background</title>
   <style>
     * {
@@ -89,7 +92,7 @@
       display: flex;
       flex-direction: column;
       gap: 15px;
-      font-family: sans-serif;
+      font-family: 'Inter', sans-serif;
       z-index: 10;
       pointer-events: auto;
     }
@@ -217,7 +220,8 @@
 
     .servo-row label {
       font-size: 12px;
-      color: #7A5230;
+      font-weight: bold;
+      color: #A07050;
     }
 
     .servo-row input[type="range"] {
@@ -225,10 +229,112 @@
     }
 
     .servo-value {
-      font-family: monospace;
       font-size: 12px;
+      font-weight: bold;
       text-align: right;
-      color: #6B4A2A;
+      color: #A07050;
+    }
+
+    input[type="range"] {
+      -webkit-appearance: none;
+      appearance: none;
+      height: 6px;
+      border-radius: 99px;
+      background: linear-gradient(to right, #A07050 0%, #A07050 var(--val, 0%), #D4B89A var(--val, 0%), #D4B89A 100%);
+      outline: none;
+      cursor: pointer;
+      transition: opacity 0.2s ease;
+    }
+
+    input[type="range"]:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+
+    /* Webkit thumb */
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: #6B4A2A;
+      border: 2px solid #D4B89A;
+      box-shadow: 0 1px 4px rgba(107, 74, 42, 0.25);
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    input[type="range"]:not(:disabled)::-webkit-slider-thumb:hover {
+      transform: scale(1.2);
+      box-shadow: 0 0 0 4px rgba(160, 112, 80, 0.2);
+    }
+
+    input[type="range"]:not(:disabled):active::-webkit-slider-thumb {
+      transform: scale(1.15);
+      box-shadow: 0 0 0 6px rgba(160, 112, 80, 0.25);
+    }
+
+    /* Firefox thumb */
+    input[type="range"]::-moz-range-thumb {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: #6B4A2A;
+      border: 2px solid #D4B89A;
+      box-shadow: 0 1px 4px rgba(107, 74, 42, 0.25);
+      cursor: pointer;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    input[type="range"]:not(:disabled)::-moz-range-thumb:hover {
+      transform: scale(1.2);
+      box-shadow: 0 0 0 4px rgba(160, 112, 80, 0.2);
+    }
+
+    .collapsible-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+      background: none;
+      border: none;
+      padding: 0;
+      cursor: pointer;
+      margin-bottom: 0;
+    }
+
+    .collapsible-header:hover {
+      border-color: transparent;
+      box-shadow: none;
+    }
+
+    .collapsible-header .label {
+      margin-bottom: 0;
+    }
+
+    .chevron {
+      font-size: 11px;
+      color: #A07050;
+      transition: transform 0.25s ease;
+      display: inline-block;
+    }
+
+    .chevron.collapsed {
+      transform: rotate(-90deg);
+    }
+
+    .collapsible-body {
+      overflow: hidden;
+      max-height: 600px;
+      transition: max-height 0.3s ease, opacity 0.25s ease, margin-top 0.25s ease;
+      opacity: 1;
+      margin-top: 10px;
+    }
+
+    .collapsible-body.collapsed {
+      max-height: 0;
+      opacity: 0;
+      margin-top: 0;
     }
   </style>
 </head>
@@ -333,7 +439,7 @@
           <circle cx="-30" cy="-190" r="4" fill="#6B4A2A" />
           <circle cx="30" cy="-190" r="4" fill="#6B4A2A" />
           <!-- Smile -->
-          <path d="M -13,-170 Q 0,-160 13,-170" stroke="#6B4A2A" stroke-width="3" stroke-linecap="round" fill="none" />
+          <path id="character-mouth" d="M -13,-170 Q 0,-160 13,-170" stroke="#6B4A2A" stroke-width="3" stroke-linecap="round" fill="none" />
         </g>
       </g>
     </g>
@@ -369,13 +475,21 @@
 
     <!-- Logs -->
     <div class="ui-panel" id="logs-container">
-      <span class="label">Logs</span>
-      <div id="logs"></div>
+      <button class="collapsible-header" id="logs-toggle" aria-expanded="true">
+        <span class="label">Logs</span>
+        <span class="chevron" id="logs-chevron">&#9660;</span>
+      </button>
+      <div class="collapsible-body" id="logs-body">
+        <div id="logs"></div>
+      </div>
     </div>
 
     <div class="ui-panel" id="servo-panel">
-      <span class="label">Manual Servo Test</span>
-
+      <button class="collapsible-header" id="servo-toggle" aria-expanded="true">
+        <span class="label">Manual Servo Test</span>
+        <span class="chevron" id="servo-chevron">&#9660;</span>
+      </button>
+      <div class="collapsible-body" id="servo-body">
       <div class="servo-row">
         <label for="servo-0">(0) Index</label>
         <input class="servo-slider" id="servo-0" type="range" min="0" max="100" value="0" data-servo-index="0" disabled />
@@ -421,6 +535,7 @@
         <input class="servo-slider" id="servo-8" type="range" min="0" max="100" value="0" data-servo-index="8" disabled />
         <span class="servo-value" id="servo-value-8">0%</span>
       </div>
+      </div><!-- end servo-body -->
     </div>
   </div>
 
@@ -666,7 +781,10 @@
       const clamped = Math.max(0, Math.min(100, value));
       const slider = document.getElementById(`servo-${index}`);
       const valueLabel = document.getElementById(`servo-value-${index}`);
-      if (slider && !activeDrag[index]) slider.value = String(clamped);
+      if (slider && !activeDrag[index]) {
+        slider.value = String(clamped);
+        updateSliderFill(slider);
+      }
       if (valueLabel) valueLabel.innerText = `${Math.round(clamped)}%`;
     }
 
@@ -854,8 +972,15 @@
     // Text Output
     const textInput = document.getElementById('text-input');
     const servoSliders = document.querySelectorAll('.servo-slider');
+
+    function updateSliderFill(slider) {
+      const pct = ((slider.value - slider.min) / (slider.max - slider.min)) * 100;
+      slider.style.setProperty('--val', pct + '%');
+    }
+
     servoSliders.forEach((slider) => {
       const i = Number(slider.dataset.servoIndex);
+      updateSliderFill(slider); // init fill
 
       const beginDrag = () => {
         activeDrag[i] = true;
@@ -876,6 +1001,7 @@
         servoUiDisplayed[i] = value;
         servoUiTarget[i] = value;
         renderServoValue(i, value);
+        updateSliderFill(slider);
         scheduleRawServoSend();
       });
     });
@@ -937,6 +1063,50 @@
       }
       updateVoiceToggle();
     };
+
+    // ── Collapsible Panels ──────────────────────────────────
+    function setupCollapsible(toggleId, bodyId, chevronId) {
+      const toggle = document.getElementById(toggleId);
+      const body = document.getElementById(bodyId);
+      const chevron = document.getElementById(chevronId);
+      let expanded = true;
+      toggle.addEventListener('click', () => {
+        expanded = !expanded;
+        body.classList.toggle('collapsed', !expanded);
+        chevron.classList.toggle('collapsed', !expanded);
+        toggle.setAttribute('aria-expanded', expanded);
+      });
+    }
+
+    setupCollapsible('logs-toggle', 'logs-body', 'logs-chevron');
+    setupCollapsible('servo-toggle', 'servo-body', 'servo-chevron');
+
+    // ── Mouth morphs to circle on left-click hold ─────────────
+    const mouthEl = document.getElementById('character-mouth');
+    const MOUTH_SMILE = 'M -10.4,-170 Q 0,-162 10.4,-170';
+    const MOUTH_CIRCLE = 'M 0,-175 m -8,0 a 8,8 0 1,0 16,0 a 8,8 0 1,0 -16,0';
+    let mouthRestoreTimer = null;
+
+    document.addEventListener('mousedown', (e) => {
+      if (e.button === 0 && mouthEl) {
+        clearTimeout(mouthRestoreTimer);
+        mouthEl.setAttribute('d', MOUTH_CIRCLE);
+        mouthEl.setAttribute('fill', '#6B4A2A');
+        mouthEl.setAttribute('stroke', 'none');
+      }
+    });
+
+    document.addEventListener('mouseup', (e) => {
+      if (e.button === 0 && mouthEl) {
+        mouthRestoreTimer = setTimeout(() => {
+          mouthEl.setAttribute('d', MOUTH_SMILE);
+          mouthEl.setAttribute('fill', 'none');
+          mouthEl.setAttribute('stroke', '#6B4A2A');
+          mouthEl.setAttribute('stroke-width', '3');
+          mouthEl.setAttribute('stroke-linecap', 'round');
+        }, 400);
+      }
+    });
 
   </script>
 </body>
