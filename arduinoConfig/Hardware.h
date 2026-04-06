@@ -46,5 +46,5 @@ Servo servos[SERVO_COUNT] = {
   // bend thumb
   Servo{7, SERVOMIN, SERVOMAX, 0, 1.0},
   // cross thumb
-  Servo{8, SERVOMIN, SERVOMAX, 0, 1.0}
+  Servo{8, SERVOMAX, SERVOMIN, 0, 0.5}
 };
