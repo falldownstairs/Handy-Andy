@@ -152,6 +152,19 @@ void applyRawServoValues(const float values[SERVO_COUNT]) {
   setTargetPercents(values, RAW_MOVE_DURATION_MS);
 }
 
+void sendCommandsList() {
+  Serial.print("COMMANDS_LIST:[");
+  for (int i = 0; i < NUM_COMMANDS; i++) {
+    Serial.print("\"");
+    Serial.print(commands[i].trigger);
+    Serial.print("\"");
+    if (i < NUM_COMMANDS - 1) {
+      Serial.print(",");
+    }
+  }
+  Serial.println("]");
+}
+
 void sendStateUpdate(bool force) {
   unsigned long now = millis();
   if (!force && (now - lastStateUpdateTime) < STATE_UPDATE_INTERVAL_MS) {
@@ -185,6 +198,7 @@ void sendStateUpdate(bool force) {
 void setup() {
   Serial.begin(9600);
   Serial.println("Running...");
+  sendCommandsList();
 
   pwm.begin();
   pwm.setOscillatorFrequency(25000000);

@@ -3,7 +3,7 @@ let isListening = false;
 let isSigning = false;
 let resolveCurrentSign = null;
 
-const COMMANDS = ['open', 'spread', 'fist', 'point', 'thumbs up'];
+let COMMANDS = [];
 const encoder = new TextEncoder();
 
 
@@ -33,6 +33,18 @@ async function startReader() {
             buffer = lines.pop();
             for (const line of lines) {
                 const trimmed = line.trim();
+                
+                // Parse command list from Arduino
+                if (trimmed.startsWith('COMMANDS_LIST:[')) {
+                    const jsonStr = trimmed.substring('COMMANDS_LIST:'.length);
+                    try {
+                        COMMANDS = JSON.parse(jsonStr);
+                        console.log('Loaded commands from Arduino:', COMMANDS);
+                    } catch (e) {
+                        console.error('Failed to parse commands list:', e);
+                    }
+                }
+                
                 if (trimmed === 'DONE' && resolveCurrentSign) {
                     resolveCurrentSign();
                     resolveCurrentSign = null;
