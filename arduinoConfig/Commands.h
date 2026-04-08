@@ -13,7 +13,11 @@ const Command commands[] = {
   {"fist", Gestures::closedFist},
   {"point", Gestures::pointIndex},
   {"thumbs up", Gestures::thumbsUp},
-  {"rock horns", Gestures::rockHorns}
+  {"rock horns", Gestures::rockHorns},
+  {"live long", Gestures::liveLong},
+  {"hold hand", Gestures::holdHand},
+  {"test", Gestures::testPose}
+
 };
 
 const Command alphabet[] = {

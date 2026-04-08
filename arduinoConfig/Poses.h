@@ -43,6 +43,24 @@ namespace Gestures {
     {100, 100, 100},
     {0, 0}
   };
+
+  const Pose liveLong = {
+    {0, 0, 0, 0},
+    {0, 100, 0},
+    {0, 0}
+  };
+
+  const Pose holdHand = {
+    {100, 100, 100, 100},
+    {100, 100, 100},
+    {100, 100}
+  };
+  
+  const Pose testPose = {
+    {10, 10, 10, 10},
+    {10, 10, 10},
+    {10, 10}
+  };
 }
 
 namespace Letters {
