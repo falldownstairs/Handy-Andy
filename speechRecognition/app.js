@@ -214,7 +214,7 @@ let currentMode = 'voice';
 let isSigning = false;
 let resolveCurrentSign = null;
 
-const FALLBACK_COMMANDS = ['open', 'spread', 'fist', 'point', 'thumbs up', 'rock horns'];
+const FALLBACK_COMMANDS = ['open', 'spread', 'fist', 'point', 'thumbs up', 'rock horns', 'test', 'hold hand', 'live long'];
 let COMMANDS = [...FALLBACK_COMMANDS];
 const encoder = new TextEncoder();
 const SERVO_COUNT = 9;
