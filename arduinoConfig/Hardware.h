@@ -40,7 +40,7 @@ Servo servos[SERVO_COUNT] = {
   // index-middle splay
   Servo{4, SERVOMIN, SERVOMAX, 0, 0.08},
   // middle-ring splay
-  Servo{5, SERVOMAX, SERVOMIN, 0, 0.09},
+  Servo{5, SERVOMAX, SERVOMIN, 0, 0.1},
   // ring-pinkie splay
   Servo{6, SERVOMAX, SERVOMIN, 0, 0.114},
   // bend thumb
