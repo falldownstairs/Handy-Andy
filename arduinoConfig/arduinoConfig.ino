@@ -27,6 +27,7 @@ Command commands[] = {
   Command{"fist", Gestures::closedFist},
   Command{"point", Gestures::pointIndex},
   Command{"thumbs up", Gestures::thumbsUp},
+  Command{"rock horns", Gestures::rockHorns}
 };
 
 Command Alphabet[] = {
@@ -69,7 +70,7 @@ float angle = 0;
 const float RAW_MOVE_DURATION_MS = 140.0;
 const unsigned long STATE_UPDATE_INTERVAL_MS = 120;
 
-int lastReportedPercents[SERVO_COUNT] = {-1, -1, -1, -1, -1, -1, -1, -1, -1};
+int lastReportedTenths[SERVO_COUNT] = {-1, -1, -1, -1, -1, -1, -1, -1, -1};
 unsigned long lastStateUpdateTime = 0;
 
 float clampPercent(float value) {
@@ -136,13 +137,13 @@ bool parseRawServoCommand(const String& rawCommand, float outValues[SERVO_COUNT]
   return true;
 }
 
-int roundedServoPercent(float value) {
-  int v = (int)round(clampPercent(value));
+int roundedServoTenths(float value) {
+  int v = (int)round(clampPercent(value) * 10.0);
   if (v < 0) {
     return 0;
   }
-  if (v > 100) {
-    return 100;
+  if (v > 1000) {
+    return 1000;
   }
   return v;
 }
@@ -158,10 +159,10 @@ void sendStateUpdate(bool force) {
   }
 
   bool changed = force;
-  int roundedValues[SERVO_COUNT];
+  int roundedTenths[SERVO_COUNT];
   for (int i = 0; i < SERVO_COUNT; i++) {
-    roundedValues[i] = roundedServoPercent(currentPercents[i]);
-    if (!changed && roundedValues[i] != lastReportedPercents[i]) {
+    roundedTenths[i] = roundedServoTenths(currentPercents[i]);
+    if (!changed && roundedTenths[i] != lastReportedTenths[i]) {
       changed = true;
     }
   }
@@ -173,8 +174,8 @@ void sendStateUpdate(bool force) {
   String stateMessage = "STATE";
   for (int i = 0; i < SERVO_COUNT; i++) {
     stateMessage += ",";
-    stateMessage += roundedValues[i];
-    lastReportedPercents[i] = roundedValues[i];
+    stateMessage += String(roundedTenths[i] / 10.0, 1);
+    lastReportedTenths[i] = roundedTenths[i];
   }
 
   Serial.println(stateMessage);

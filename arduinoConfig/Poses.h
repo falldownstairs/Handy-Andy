@@ -37,6 +37,11 @@ namespace Gestures {
     {0, 0, 0},
     {0, 0}
   };
+  const Pose rockHorns = {
+    {0, 100, 100, 0},
+    {100, 100, 100},
+    {0, 0}
+  };
 }
 
 namespace Letters {

@@ -492,47 +492,47 @@
       <div class="collapsible-body" id="servo-body">
       <div class="servo-row">
         <label for="servo-0">(0) Index</label>
-        <input class="servo-slider" id="servo-0" type="range" min="0" max="100" value="0" data-servo-index="0" disabled />
+        <input class="servo-slider" id="servo-0" type="range" min="0" max="100" step="0.1" value="0" data-servo-index="0" disabled />
         <span class="servo-value" id="servo-value-0">0%</span>
       </div>
       <div class="servo-row">
         <label for="servo-1">(1) Middle</label>
-        <input class="servo-slider" id="servo-1" type="range" min="0" max="100" value="0" data-servo-index="1" disabled />
+        <input class="servo-slider" id="servo-1" type="range" min="0" max="100" step="0.1" value="0" data-servo-index="1" disabled />
         <span class="servo-value" id="servo-value-1">0%</span>
       </div>
       <div class="servo-row">
         <label for="servo-2">(2) Ring</label>
-        <input class="servo-slider" id="servo-2" type="range" min="0" max="100" value="0" data-servo-index="2" disabled />
+        <input class="servo-slider" id="servo-2" type="range" min="0" max="100" step="0.1" value="0" data-servo-index="2" disabled />
         <span class="servo-value" id="servo-value-2">0%</span>
       </div>
       <div class="servo-row">
         <label for="servo-3">(3) Pinkie</label>
-        <input class="servo-slider" id="servo-3" type="range" min="0" max="100" value="0" data-servo-index="3" disabled />
+        <input class="servo-slider" id="servo-3" type="range" min="0" max="100" step="0.1" value="0" data-servo-index="3" disabled />
         <span class="servo-value" id="servo-value-3">0%</span>
       </div>
       <div class="servo-row">
         <label for="servo-4">(4) Splay IM</label>
-        <input class="servo-slider" id="servo-4" type="range" min="0" max="100" value="0" data-servo-index="4" disabled />
+        <input class="servo-slider" id="servo-4" type="range" min="0" max="100" step="0.1" value="0" data-servo-index="4" disabled />
         <span class="servo-value" id="servo-value-4">0%</span>
       </div>
       <div class="servo-row">
         <label for="servo-5">(5) Splay MR</label>
-        <input class="servo-slider" id="servo-5" type="range" min="0" max="100" value="0" data-servo-index="5" disabled />
+        <input class="servo-slider" id="servo-5" type="range" min="0" max="100" step="0.1" value="0" data-servo-index="5" disabled />
         <span class="servo-value" id="servo-value-5">0%</span>
       </div>
       <div class="servo-row">
         <label for="servo-6">(6) Splay RP</label>
-        <input class="servo-slider" id="servo-6" type="range" min="0" max="100" value="0" data-servo-index="6" disabled />
+        <input class="servo-slider" id="servo-6" type="range" min="0" max="100" step="0.1" value="0" data-servo-index="6" disabled />
         <span class="servo-value" id="servo-value-6">0%</span>
       </div>
       <div class="servo-row">
         <label for="servo-7">(7) Thumb Bend</label>
-        <input class="servo-slider" id="servo-7" type="range" min="0" max="100" value="0" data-servo-index="7" disabled />
+        <input class="servo-slider" id="servo-7" type="range" min="0" max="100" step="0.1" value="0" data-servo-index="7" disabled />
         <span class="servo-value" id="servo-value-7">0%</span>
       </div>
       <div class="servo-row">
         <label for="servo-8">(8) Thumb Cross</label>
-        <input class="servo-slider" id="servo-8" type="range" min="0" max="100" value="0" data-servo-index="8" disabled />
+        <input class="servo-slider" id="servo-8" type="range" min="0" max="100" step="0.1" value="0" data-servo-index="8" disabled />
         <span class="servo-value" id="servo-value-8">0%</span>
       </div>
       </div><!-- end servo-body -->
@@ -782,10 +782,10 @@
       const slider = document.getElementById(`servo-${index}`);
       const valueLabel = document.getElementById(`servo-value-${index}`);
       if (slider && !activeDrag[index]) {
-        slider.value = String(clamped);
+        slider.value = clamped.toFixed(1);
         updateSliderFill(slider);
       }
-      if (valueLabel) valueLabel.innerText = `${Math.round(clamped)}%`;
+      if (valueLabel) valueLabel.innerText = `${clamped.toFixed(1)}%`;
     }
 
     function animateServoUi() {
@@ -825,7 +825,7 @@
 
     function sendRawServoState() {
       if (!writer || isSigning) return;
-      const payload = 'raw,' + servoPercents.map((v) => Math.round(v)).join(',');
+      const payload = 'raw,' + servoPercents.map((v) => Math.max(0, Math.min(100, Number(v) || 0)).toFixed(1)).join(',');
       writer.write(encoder.encode(payload + "\n"));
     }
 

@@ -30,17 +30,17 @@ struct Servo {
 
 Servo servos[SERVO_COUNT] = {
   // index finger
-  Servo{0, SERVOMIN, SERVOMAX, 0, 1.0},
+  Servo{0, SERVOMIN, SERVOMAX, 0, 0.9},
   // middle finger
-  Servo{1, SERVOMIN, SERVOMAX, 0, 1.0},
+  Servo{1, SERVOMIN, SERVOMAX, 0, 0.9},
   // ring finger
-  Servo{2, SERVOMIN, SERVOMAX, 0, 1.0},
+  Servo{2, SERVOMIN, SERVOMAX, 0, 0.9},
   // pinkie finger
-  Servo{3, SERVOMIN, SERVOMAX, 0, 1.0},
+  Servo{3, SERVOMIN, SERVOMAX, 0, 0.9},
   // index-middle splay
-  Servo{4, SERVOMIN, SERVOMAX, 0, 0.086},
+  Servo{4, SERVOMIN, SERVOMAX, 0, 0.08},
   // middle-ring splay
-  Servo{5, SERVOMAX, SERVOMIN, 0, 0.101},
+  Servo{5, SERVOMAX, SERVOMIN, 0, 0.09},
   // ring-pinkie splay
   Servo{6, SERVOMAX, SERVOMIN, 0, 0.114},
   // bend thumb
