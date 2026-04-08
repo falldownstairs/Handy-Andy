@@ -88,6 +88,11 @@ void sendCommandsList() {
 }
 
 void handleIncomingCommand(const String& command, unsigned long& signCompleteTime, bool& waitingForDone) {
+  if (command.equalsIgnoreCase("GET_COMMANDS")) {
+    sendCommandsList();
+    return;
+  }
+
   if (command.startsWith("raw,")) {
     float values[SERVO_COUNT];
     if (parseRawServoCommand(command, values)) {

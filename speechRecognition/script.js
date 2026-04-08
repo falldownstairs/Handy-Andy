@@ -3,7 +3,8 @@ let isListening = false;
 let isSigning = false;
 let resolveCurrentSign = null;
 
-let COMMANDS = [];
+const FALLBACK_COMMANDS = ['open', 'spread', 'fist', 'point', 'thumbs up', 'rock horns'];
+let COMMANDS = [...FALLBACK_COMMANDS];
 const encoder = new TextEncoder();
 
 
@@ -14,6 +15,8 @@ document.getElementById('connect').onclick = async () => {
         writer = port.writable.getWriter();
         reader = port.readable.getReader();
         startReader();
+        // Explicitly request commands in case startup serial lines were missed.
+        await writer.write(encoder.encode("GET_COMMANDS\n"));
         document.getElementById('status').innerText = "Status: Connected!";
     } catch (err) {
         alert("err");
@@ -33,15 +36,24 @@ async function startReader() {
             buffer = lines.pop();
             for (const line of lines) {
                 const trimmed = line.trim();
+                if (!trimmed) continue;
+                console.log('Serial:', trimmed);
                 
                 // Parse command list from Arduino
                 if (trimmed.startsWith('COMMANDS_LIST:[')) {
                     const jsonStr = trimmed.substring('COMMANDS_LIST:'.length);
                     try {
-                        COMMANDS = JSON.parse(jsonStr);
+                        const parsed = JSON.parse(jsonStr);
+                        if (Array.isArray(parsed) && parsed.length > 0) {
+                            COMMANDS = parsed
+                                .map((c) => String(c).toLowerCase().trim())
+                                .filter(Boolean);
+                        }
                         console.log('Loaded commands from Arduino:', COMMANDS);
+                        document.getElementById('status').innerText = `Commands loaded: ${COMMANDS.join(', ')}`;
                     } catch (e) {
                         console.error('Failed to parse commands list:', e);
+                        document.getElementById('status').innerText = 'Using fallback commands';
                     }
                 }
                 
@@ -67,13 +79,14 @@ async function sendAndWait(command) {
 
 function parseTokens(text) {
     const tokens = [];
+    const normalizedCommands = COMMANDS.map((c) => c.toLowerCase());
     const words = text.split(/\s+/).filter(Boolean);
     let i = 0;
     while (i < words.length) {
         let matched = false;
         for (let len = words.length - i; len > 1; len--) {
             const phrase = words.slice(i, i + len).join(' ');
-            if (COMMANDS.includes(phrase)) {
+            if (normalizedCommands.includes(phrase)) {
                 tokens.push(phrase);
                 i += len;
                 matched = true;
@@ -81,7 +94,7 @@ function parseTokens(text) {
             }
         }
         if (!matched) {
-            if (COMMANDS.includes(words[i])) {
+            if (normalizedCommands.includes(words[i])) {
                 tokens.push(words[i]);
             } else {
                 for (const ch of words[i].toUpperCase()) {
@@ -111,6 +124,7 @@ recognition.onresult = async (event) => {
         isSigning = true;
         document.getElementById('toggle').disabled = true;
         const tokens = parseTokens(transcript);
+        console.log('Tokens:', tokens);
         for (const token of tokens) {
             console.log(`Signing: "${token}"`);
             await sendAndWait(token);

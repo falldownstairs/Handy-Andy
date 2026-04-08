@@ -755,7 +755,8 @@
     let isSigning = false;
     let resolveCurrentSign = null;
 
-    const COMMANDS = ['open', 'spread', 'fist', 'point', 'thumbs up'];
+    const FALLBACK_COMMANDS = ['open', 'spread', 'fist', 'point', 'thumbs up', 'rock horns'];
+    let COMMANDS = [...FALLBACK_COMMANDS];
     const encoder = new TextEncoder();
     const SERVO_COUNT = 9;
     const servoPercents = new Array(SERVO_COUNT).fill(0);
@@ -849,7 +850,22 @@
           buffer = lines.pop();
           for (const line of lines) {
             const trimmed = line.trim();
-            if (trimmed === 'DONE' && resolveCurrentSign) {
+            if (!trimmed) continue;
+
+            if (trimmed.startsWith('COMMANDS_LIST:[')) {
+              const jsonStr = trimmed.substring('COMMANDS_LIST:'.length);
+              try {
+                const parsed = JSON.parse(jsonStr);
+                if (Array.isArray(parsed) && parsed.length > 0) {
+                  COMMANDS = parsed
+                    .map((c) => String(c).toLowerCase().trim())
+                    .filter(Boolean);
+                  logMessage(`Commands synced: ${COMMANDS.join(', ')}`, 'sys');
+                }
+              } catch (e) {
+                logMessage('Failed to parse command list; using fallback commands', 'err');
+              }
+            } else if (trimmed === 'DONE' && resolveCurrentSign) {
               resolveCurrentSign();
               resolveCurrentSign = null;
             } else if (trimmed.startsWith('STATE,')) {
@@ -857,6 +873,8 @@
               if (values.length === SERVO_COUNT) {
                 applyServoState(values);
               }
+            } else if (trimmed.startsWith('Unknown command:')) {
+              logMessage(trimmed, 'err');
             }
           }
         }
@@ -874,13 +892,14 @@
 
     function parseTokens(text) {
       const tokens = [];
+      const normalizedCommands = COMMANDS.map((c) => c.toLowerCase());
       const words = text.split(/\s+/).filter(Boolean);
       let i = 0;
       while (i < words.length) {
         let matched = false;
         for (let len = words.length - i; len > 1; len--) {
           const phrase = words.slice(i, i + len).join(' ');
-          if (COMMANDS.includes(phrase)) {
+          if (normalizedCommands.includes(phrase)) {
             tokens.push(phrase);
             i += len;
             matched = true;
@@ -888,7 +907,7 @@
           }
         }
         if (!matched) {
-          if (COMMANDS.includes(words[i])) {
+          if (normalizedCommands.includes(words[i])) {
             tokens.push(words[i]);
           } else {
             for (const ch of words[i].toUpperCase()) {
@@ -936,6 +955,7 @@
         writer = port.writable.getWriter();
         reader = port.readable.getReader();
         startReader();
+        await writer.write(encoder.encode("GET_COMMANDS\n"));
         setServoControlsDisabled(false);
         logMessage("Arduino Connected Successfully", 'sys');
         document.getElementById('connect-btn').innerText = "Connected";
