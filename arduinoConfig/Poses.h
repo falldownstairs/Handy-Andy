@@ -51,7 +51,7 @@ namespace Gestures {
   };
 
   const Pose holdHand = {
-    {100, 100, 100, 100},
+    {80, 80, 80, 80},
     {100, 100, 100},
     {100, 100}
   };
